@@ -8,7 +8,6 @@ class Dataset(nn.Module):
     self.l = open(filename).readlines()
     self.l, n = self.l[:-1], int(self.l[-1])
     assert len(self.l) == n
-    n //= 100
     if split == 'train':
       self.l = self.l[:9 * n // 10]
     elif split == 'test':
@@ -54,18 +53,19 @@ class Model(nn.Module):
     return x.mean(-1).squeeze(-1)
 
 device = 'cuda'
-H = Model(n_channels=128, embedding_dim=256).to(device)  # if it's energy, why don't we call it "H"?))
+H = Model(n_channels=512, embedding_dim=256).to(device)  # if it's energy, why don't we call it "H"?))
 optimizer = torch.optim.Adam(H.parameters(), lr=1e-3)
 
 losses = []
 for s, t in tqdm(train_dataloader):
   s, t = s.to(device), t.to(device)
   E_s, E_t = H(s), H(t)
-  loss = F.relu(E_t - E_s).mean()
+  loss = F.relu(E_t + 1 - E_s).mean()
   optimizer.zero_grad()
   loss.backward()
   optimizer.step()
   losses.append(loss.item())
+print('Loss:', np.mean(losses[-100:]))
 
 plt.figure(figsize=(19.2, 10.8))
 plt.plot(losses)
