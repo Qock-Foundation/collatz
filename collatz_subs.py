@@ -14,14 +14,16 @@ if __name__ == '__main__':
         s1, s2 = line.strip().split(' -> ')
         subs.append((s1, s2))
     for _ in tqdm.tqdm(range(N)):
-        L = random.randint(L_min, L_max)
-        chars = 'abefg'
-        out1 = 'c' + ''.join(random.choice(chars) for _ in range(L - 2)) + 'd'
         occ = []
-        for s1, s2 in subs:
-            for i in range(L - len(s1) + 1):
-                if out1[i:i + len(s1)] == s1:
-                    occ.append((i, s1, s2))
+        out1 = ''
+        while not occ:
+            L = random.randint(L_min, L_max)
+            chars = 'abefg'
+            out1 = 'c' + ''.join(random.choice(chars) for _ in range(L - 2)) + 'd'
+            for s1, s2 in subs:
+                for i in range(L - len(s1) + 1):
+                    if out1[i:i + len(s1)] == s1:
+                        occ.append((i, s1, s2))
         ind, s1, s2 = random.choice(occ)
         out2 = out1[:ind] + s2 + out1[ind + len(s1):]
         print(out1, out2)
