@@ -9,17 +9,18 @@ class Dataset(nn.Module):
     self.l = open(filename).readlines()
     self.l, n = self.l[:-1], int(self.l[-1])
     assert len(self.l) == n
-    n = 300_000
+    n = 1_000_000
     if split == 'train':
       self.l = self.l[:9 * n // 10]
     elif split == 'test':
       self.l == self.l[9 * n // 10:]
     else:
       assert False
+    self.l = sorted(self.l, key=len)
   def __getitem__(self, i):
     s, t = self.l[i].split()
-    return torch.tensor(np.vectorize(ord)(np.array(list(s))) - ord('a'), dtype=torch.long), \
-           torch.tensor(np.vectorize(ord)(np.array(list(t))) - ord('a'), dtype=torch.long)
+    return torch.tensor(np.vectorize(ord)(np.array(list(s))) - ord('a') + 1, dtype=torch.long), \
+           torch.tensor(np.vectorize(ord)(np.array(list(t))) - ord('a') + 1, dtype=torch.long)
   def __len__(self):
     return len(self.l)
 
@@ -33,11 +34,11 @@ def collate_fn(batch):
            torch.stack([F.pad(s, (L - s.shape[-1], 0)) for t, s in batch]))
   return batch
 
-batch_size = 32
+batch_size = 8
 train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, collate_fn=collate_fn, shuffle=True, pin_memory=True)
 test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size, collate_fn=collate_fn, shuffle=True, pin_memory=True)
 
-n_letters = 7
+n_letters = 7 + 1  # blank
 
 class Model(nn.Module):
   def __init__(self, n_channels, embedding_dim):
@@ -56,16 +57,16 @@ class Model(nn.Module):
     return x.mean(-1).squeeze(-1)
 
 device = 'cuda'
-H = Model(n_channels=512, embedding_dim=256).to(device)  # if it's energy, why don't we call it "H"?))
+H = Model(n_channels=128, embedding_dim=256).to(device)  # if it's energy, why don't we call it "H"?))
 optimizer = torch.optim.Adam(H.parameters(), lr=1e-3)
 #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=1-5/len(train_dataloader))  # e^5 ~= 150
-scheduler = torch.optim.lr_scheduler.LinearLR(optimizer, 1, 0, total_iters=len(train_dataloader))
+scheduler = None  #torch.optim.lr_scheduler.LinearLR(optimizer, 1, 0, total_iters=len(train_dataloader))
 
 losses = []
 for s, t in tqdm(train_dataloader):
   s, t = s.to(device), t.to(device)
   E_s, E_t = H(s), H(t)
-  if np.random.randint(10000) == 0:
+  if np.random.randint(1000) == 0:
     print(f'{E_s=}, {E_t=}')
   loss = F.relu(E_t + 1 - E_s).mean()
   optimizer.zero_grad()
