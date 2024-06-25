@@ -9,7 +9,7 @@ class Dataset(nn.Module):
     self.l = open(filename).readlines()
     self.l, n = self.l[:-1], int(self.l[-1])
     assert len(self.l) == n
-    n = 1_000_000
+    n = 300_000
     if split == 'train':
       self.l = self.l[:9 * n // 10]
     elif split == 'test':
@@ -29,14 +29,14 @@ train_dataset = Dataset(filename, split='train')
 test_dataset = Dataset(filename, split='test')
 
 def collate_fn(batch):
-  L = max(max(t.shape[-1], s.shape[-1]) for t, s in batch)
+  L = max(20, max(max(t.shape[-1], s.shape[-1]) for t, s in batch))
   batch = (torch.stack([F.pad(t, (L - t.shape[-1], 0)) for t, s in batch]),
            torch.stack([F.pad(s, (L - s.shape[-1], 0)) for t, s in batch]))
   return batch
 
 batch_size = 8
-train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, collate_fn=collate_fn, shuffle=True, pin_memory=True)
-test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size, collate_fn=collate_fn, shuffle=True, pin_memory=True)
+train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, collate_fn=collate_fn, shuffle=False, pin_memory=True)
+test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size, collate_fn=collate_fn, shuffle=False, pin_memory=True)
 
 n_letters = 7 + 1  # blank
 
@@ -59,7 +59,7 @@ class Model(nn.Module):
     return self.post_rnn(h)
 
 device = 'cuda'
-H = Model(num_layers=3, embedding_dim=2048).to(device)  # if it's energy, why don't we call it "H"?))
+H = Model(num_layers=3, embedding_dim=1024).to(device)  # if it's energy, why don't we call it "H"?))
 optimizer = torch.optim.Adam(H.parameters(), lr=1e-4)
 #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=1-5/len(train_dataloader))  # e^5 ~= 150
 scheduler = None  #torch.optim.lr_scheduler.LinearLR(optimizer, 1, 0, total_iters=len(train_dataloader))

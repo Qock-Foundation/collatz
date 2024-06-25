@@ -1,0 +1,38 @@
+problem   dataset model n     final loss  comments
+weakened  L20     Conv  30k   0.068
+weakened  L20     Conv  100k  0.044
+weakened  L20     Conv  300k  0.035
+weakened  L20     Conv  1M    0.040
+weakened  L20     RNN   30k   0.210
+weakened  L20     RNN   100k  0.102
+weakened  L20     RNN   300k  0.781       wtf
+weakened  L20     RNN   300k  0.155
+
+collatz   L20     Conv  30k   0.837
+collatz   L20     Conv  100k  0.606
+collatz   L20     Conv  300k  0.431
+collatz   L20     Conv  1M    0.371
+collatz   L20     RNN   30k   0.906
+collatz   L20     RNN   100k  0.778
+collatz   L20     RNN   300k  0.721
+
+collatz   L100    Conv  30k   0.980
+collatz   L100    Conv  100k  0.971
+collatz   L100    Conv  300k  0.950
+collatz   L100    Conv  1M    0.880       wow, huge drop
+collatz   L100    RNN   30k   0.996
+collatz   L100    RNN   100k  0.984
+collatz   L100    RNN   300k  0.991
+
+collatz   curric. Conv  30k   0.931       invalidated
+collatz   curric. Conv  100k  0.904       invalidated
+collatz   curric. Conv  300k  0.632       invalidated
+collatz   curric. Conv  1M    0.806       invalidated
+
+collatz   curric. RNN   30k   0.953       invalidated
+collatz   curric. RNN   100k  0.939       invalidated
+collatz   curric. RNN   300k  0.944       invalidated
+
+
+Conv: 128 channels, embedding dim 256, lr 1e-3
+RNN: 3-layer hidden size 1024, lr 1e-4
