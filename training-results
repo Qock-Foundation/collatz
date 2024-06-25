@@ -33,6 +33,18 @@ collatz   curric. RNN   30k   0.953       invalidated
 collatz   curric. RNN   100k  0.939       invalidated
 collatz   curric. RNN   300k  0.944       invalidated
 
+datasets and sorting rules updated here
+
+collatz   L20     Conv  30k   0.909
+collatz   L20     Conv  100k  0.889
+collatz   L20     Conv  300k  0.894
+collatz   L20     Conv  1M    0.890
+collatz   curric. Conv  30k   0.985
+collatz   curric. Conv  100k  0.988
+collatz   curric. Conv  300k  0.989
+reg const 0.1->0.01
+1M 0.977
+
 
 Conv: 128 channels, embedding dim 256, lr 1e-3
 RNN: 3-layer hidden size 1024, lr 1e-4
