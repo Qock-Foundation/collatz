@@ -53,14 +53,15 @@ class Model(nn.Module):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print(f'usage: {sys.argv[0]} subs.txt')
+    if len(sys.argv) != 5:
+        print(f'usage: {sys.argv[0]} subs.txt L_min L_max L_test')
         exit(1)
     subs = read_subs(sys.argv[1])
+    len_min = int(sys.argv[2])
+    len_max = int(sys.argv[3])
+    len_test = int(sys.argv[4])
     model = Model(hidden_size=10).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    len_min = 5
-    len_max = 30
     num_batches = 1000
     batch_size = 128
     for length in range(len_min, len_max + 1):
@@ -81,9 +82,8 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
-    test_len = 30
     test_size = 100
-    x, y = gen_samples(test_size, test_len, subs)
+    x, y = gen_samples(test_size, len_test, subs)
     x, y = x.to(device), y.to(device)
     p_x, p_y = model(x), model(y)
     for i in range(test_size):
@@ -92,4 +92,6 @@ if __name__ == '__main__':
         print(p_x[i].item(), p_y[i].item())
     accuracy = (p_y < p_x - delta).float().mean()
     mn, mx = torch.min(p_x), torch.max(p_x)
-    print(f'accuracy: {accuracy.item()}')
+    print(f'accuracy: {accuracy.item():.2f}')
+    filename = input('enter model filename: ')
+    torch.save(model.state_dict(), filename)
